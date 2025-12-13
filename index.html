@@ -212,25 +212,28 @@ body{
   border-radius: 4px;
 }
 
-.slider-horizontal .thumb {
-  flex: 0 0 520px;
-  height: 380px;
-  scroll-snap-align: start;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  padding: 16px;
+
+/* ILUSTRACIÓN – más grande y protagonista */
+#personajesContent .slider-horizontal .thumb {
+  flex: 0 0 720px;   /* 👈 más ancho que editorial */
+  height: 520px;     /* 👈 menos alto para personajes */
+  padding: 30px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
-.slider-horizontal .thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+#personajesContent .slider-horizontal .thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain; /* nunca se deforma */
 }
+
+
+
+
 /* FLECHAS DEL SLIDER */
 .slider-arrows {
   position: relative;
@@ -333,14 +336,7 @@ body{
     max-height .45s ease,
     transform .45s ease;
 }
-	/* Evita que el toggle bloquee el scroll horizontal del slider */
-.slider-editorial {
-  max-height: none !important;
-  overflow: visible !important;
-  opacity: 1 !important;
-  transform: none !important;
-  padding-top: 10px !important;
-}
+
 .slider-container {
   overflow-x: auto;
   padding-bottom: 10px;
@@ -606,8 +602,9 @@ body{
 	<p class="sec-sub">Contenido editorial aquí.</p>
 <div class="slider-container slider-arrows">
 
-  <button class="slider-arrow left" id="arrowLeft">‹</button>
-  <button class="slider-arrow right" id="arrowRight">›</button>
+<button class="slider-arrow left" aria-label="Anterior">‹</button>
+<button class="slider-arrow right" aria-label="Siguiente">›</button>
+
 
   <div class="slider-horizontal" id="editorialSlider">
 
@@ -628,9 +625,56 @@ body{
 </div>
 
 <div id="personajesContent" class="toggle-section">
-  <p class="sec-sub">Contenido de ilustración aquí.</p>
+  <p class="sec-sub">Ilustraciones y personajes desarrollados para distintas marcas.</p>
+
+  <div class="slider-container slider-arrows">
+
+<button class="slider-arrow left" aria-label="Anterior">‹</button>
+<button class="slider-arrow right" aria-label="Siguiente">›</button>
+
+
+    <div class="slider-horizontal" id="ilustracionSlider">
+
+      <div class="thumb">
+        <img src="img/ilustracion/Niño-Niña-mascota-ASVALLE.png" alt="ASVALLE">
+        <p>ASVALLE</p>
+      </div>
+
+      <div class="thumb">
+        <img src="img/ilustracion/Personaje-Niña-Centinelas-Ambientales-2.png" alt="CICAM">
+        <p>CICAM</p>
+      </div>
+
+      <div class="thumb">
+        <img src="img/ilustracion/Personaje-Niña-Centinelas-Ambientales.png" alt="Centinelas">
+        <p>Centinelas Ambientales</p>
+      </div>
+
+      <div class="thumb">
+        <img src="img/ilustracion/Personaje-Niño-Centinelas-Ambientales-2.png" alt="Personaje niño">
+        <p>Personaje niño</p>
+      </div>
+
+      <div class="thumb">
+        <img src="img/ilustracion/Personaje-Niño-Centinelas-Ambientales.png" alt="Personaje niño">
+        <p>Personaje niño</p>
+      </div>
+
+      <div class="thumb">
+        <img src="img/ilustracion/Valla-publicitaria-ASVALLE.jpg" alt="Valla ASVALLE">
+        <p>Valla ASVALLE</p>
+      </div>
+
+      <div class="thumb">
+        <img src="img/ilustracion/Valla-publicitaria-Petronova.jpg" alt="Valla Petronova">
+        <p>Valla Petronova</p>
+      </div>
+
+    </div>
+  </div>
 </div>
 
+	
 <div id="infografiasContent" class="toggle-section">
   <p class="sec-sub">Contenido de diagramación aquí.</p>
 </div>
@@ -691,7 +735,33 @@ document.getElementById('y').textContent = new Date().getFullYear();
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+ const ilustracionSlider = document.getElementById("ilustracionSlider");
+  if (!ilustracionSlider) return;
 
+  const images = ilustracionSlider.querySelectorAll("img");
+  if (images.length === 0) return;
+
+  const firstImage = images[0];
+
+  const syncHeights = () => {
+    const referenceHeight = firstImage.offsetHeight;
+    if (referenceHeight === 0) return;
+
+    images.forEach(img => {
+      img.style.height = referenceHeight + "px";
+		img.style.maxHeight = "500px";
+    });
+  };
+
+  // Si la primera imagen ya cargó
+  if (firstImage.complete) {
+    syncHeights();
+  } else {
+    firstImage.onload = syncHeights;
+  }
+
+  // Recalcular si cambia el tamaño de la ventana
+  window.addEventListener("resize", syncHeights);
     /* ────────────────────────────────
        SISTEMA DE BOTONES Y SECCIONES
     ───────────────────────────────── */
@@ -743,21 +813,34 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    arrowRight.addEventListener("click", () => {
-        slider.scrollBy({
-            left: 500,
-            behavior: "smooth"
+	   /* ────────────────────────────────
+          SLIDER HORIZONTAL ILUSTRACIÓN
+    ───────────────────────────────── */
+
+	const sliderIlus = document.getElementById("ilustracionSlider");
+  	const arrowLeftIlus = document.getElementById("arrowLeftIlus");
+  	const arrowRightIlus = document.getElementById("arrowRightIlus");
+
+if (sliderIlus && arrowLeftIlus && arrowRightIlus) {
+  arrowLeftIlus.addEventListener("click", () => {
+    sliderIlus.scrollBy({ left: -500, behavior: "smooth" });
+  });
+
+  arrowRightIlus.addEventListener("click", () => {
+    sliderIlus.scrollBy({ left: 500, behavior: "smooth" });
+  });
+}
+
+
+  arrowRightIlus.addEventListener("click", () => {
+    sliderIlus.scrollBy({
+      left: 500,
+      behavior: "smooth"
         });
     });
 
 });
 </script>
-
-
-
-
-
-
 
 </body>
 </html>
